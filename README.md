@@ -7,9 +7,9 @@ GraphiSurf is an image search engine that allows you to search for images by upl
 
 **Note: Chrome & Edge are recommended.**
 
-![Overview1](static\images\overview1.jpg)
+![Overview1](static/images/overview1.jpg)
 
-![Overview2](static\images\overview2.jpg)
+![Overview2](static/images/overview2.jpg)
 
 ## Installation
 
