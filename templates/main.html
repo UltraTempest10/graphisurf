@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+    <title>GraphiSurf - Your Image Search Companion</title>
+    <link type="image/png" sizes="96x96" rel="icon" href="/images/surf.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js"></script>
+
+    <style>
+        .table {
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            background-color: rgba(0, 191, 255, 0);
+            box-shadow: rgba(0, 0, 0, 0.3) 2px 8px 8px;
+            border: 2px rgba(255, 255, 255, 0.4) solid;
+            border-bottom: 2px rgba(40, 40, 40, 0.35) solid;
+            border-right: 2px rgba(40, 40, 40, 0.35) solid;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            border-top: none
+        }
+
+        .button {
+            background: #06BAFF;
+            background-image: -webkit-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -moz-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -ms-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -o-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: linear-gradient(to right, #06BAFF, #1E94E5);
+            border: none;
+            width: 200px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            font-family: verdana, serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: snow;
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.3) 1px 3px 3px;
+        }
+
+        .button:hover {
+            background: #06CAFF;
+            background-image: -webkit-linear-gradient(left, #06CAFF, #1EA4E5);
+            background-image: -moz-linear-gradient(left, #06CAFF, #1EA4E5);
+            background-image: -ms-linear-gradient(left, #06CAFF, #1EA4E5);
+            background-image: -o-linear-gradient(left, #06CAFF, #1EA4E5);
+            background-image: linear-gradient(to right, #06CAFF, #1EA4E5);
+        }
+
+        .filter-button {
+            background-color: lightgrey;
+            border: none;
+            width: 80px;
+            height: 30px;
+            line-height: 20px;
+            text-align: center;
+            font-family: verdana, serif;
+            color: #5C5C5C;
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 2px;
+            margin-right: 20px;
+        }
+
+        .selected-button {
+            background: #06BAFF;
+            background-image: -webkit-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -moz-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -ms-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -o-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: linear-gradient(to right, #06BAFF, #1E94E5);
+            border: none;
+            width: 80px;
+            height: 30px;
+            line-height: 20px;
+            text-align: center;
+            font-family: verdana, serif;
+            color: snow;
+            border-radius: 20px;
+            box-shadow: rgba(0, 0, 0, 0.2) 1px 2px 2px;
+            margin-right: 20px;
+        }
+
+        .filter-button:hover {
+            background: #06BAFF;
+            background-image: -webkit-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -moz-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -ms-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: -o-linear-gradient(left, #06BAFF, #1E94E5);
+            background-image: linear-gradient(to right, #06BAFF, #1E94E5);
+            color: snow;
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .download-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .image-container:hover .download-button {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body style="background: #F0F0F0;">
+
+<!-- background -->
+<svg style="position: fixed; bottom: 0; left: 0; z-index: -1;" width="100%" id="svg" viewBox="0 0 1440 390"
+     xmlns="http://www.w3.org/2000/svg" class="transition duration-300 ease-in-out delay-150">
+    <style>
+        .path-0 {
+            animation: pathAnim-0 4s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes pathAnim-0 {
+            0% {
+                d: path("M 0,400 C 0,400 0,133 0,133 C 73.94258373205744,142.5023923444976 147.8851674641149,152.00478468899522 247,158 C 346.1148325358851,163.99521531100478 470.4019138755981,166.48325358851676 565,148 C 659.5980861244019,129.51674641148324 724.5071770334928,90.0622009569378 825,95 C 925.4928229665072,99.9377990430622 1061.5693779904307,149.26794258373207 1170,163 C 1278.4306220095693,176.73205741626793 1359.2153110047848,154.86602870813397 1440,133 C 1440,133 1440,400 1440,400 Z");
+            }
+            25% {
+                d: path("M 0,400 C 0,400 0,133 0,133 C 116.32535885167462,122.26315789473685 232.65071770334924,111.5263157894737 319,124 C 405.34928229665076,136.4736842105263 461.72248803827756,172.1578947368421 551,173 C 640.2775119617224,173.8421052631579 762.4593301435406,139.84210526315786 875,132 C 987.5406698564594,124.15789473684212 1090.44019138756,142.47368421052633 1183,147 C 1275.55980861244,151.52631578947367 1357.77990430622,142.26315789473682 1440,133 C 1440,133 1440,400 1440,400 Z");
+            }
+            50% {
+                d: path("M 0,400 C 0,400 0,133 0,133 C 90.3732057416268,129.6602870813397 180.7464114832536,126.32057416267942 281,119 C 381.2535885167464,111.67942583732058 491.38755980861254,100.37799043062202 593,98 C 694.6124401913875,95.62200956937798 787.7033492822965,102.16746411483253 877,109 C 966.2966507177035,115.83253588516747 1051.799043062201,122.95215311004785 1145,127 C 1238.200956937799,131.04784688995215 1339.1004784688994,132.02392344497608 1440,133 C 1440,133 1440,400 1440,400 Z");
+            }
+            75% {
+                d: path("M 0,400 C 0,400 0,133 0,133 C 82.10526315789477,137.1818181818182 164.21052631578954,141.36363636363637 276,128 C 387.78947368421046,114.63636363636363 529.2631578947368,83.7272727272727 623,92 C 716.7368421052632,100.2727272727273 762.7368421052631,147.72727272727272 836,169 C 909.2631578947369,190.27272727272728 1009.7894736842106,185.36363636363637 1115,175 C 1220.2105263157894,164.63636363636363 1330.1052631578946,148.8181818181818 1440,133 C 1440,133 1440,400 1440,400 Z");
+            }
+            100% {
+                d: path("M 0,400 C 0,400 0,133 0,133 C 73.94258373205744,142.5023923444976 147.8851674641149,152.00478468899522 247,158 C 346.1148325358851,163.99521531100478 470.4019138755981,166.48325358851676 565,148 C 659.5980861244019,129.51674641148324 724.5071770334928,90.0622009569378 825,95 C 925.4928229665072,99.9377990430622 1061.5693779904307,149.26794258373207 1170,163 C 1278.4306220095693,176.73205741626793 1359.2153110047848,154.86602870813397 1440,133 C 1440,133 1440,400 1440,400 Z");
+            }
+        }</style>
+    <defs>
+        <linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="5%" stop-color="#0693e3"></stop>
+            <stop offset="95%" stop-color="#afeeee"></stop>
+        </linearGradient>
+    </defs>
+    <path d="M 0,400 C 0,400 0,133 0,133 C 73.94258373205744,142.5023923444976 147.8851674641149,152.00478468899522 247,158 C 346.1148325358851,163.99521531100478 470.4019138755981,166.48325358851676 565,148 C 659.5980861244019,129.51674641148324 724.5071770334928,90.0622009569378 825,95 C 925.4928229665072,99.9377990430622 1061.5693779904307,149.26794258373207 1170,163 C 1278.4306220095693,176.73205741626793 1359.2153110047848,154.86602870813397 1440,133 C 1440,133 1440,400 1440,400 Z"
+          stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="0.53"
+          class="transition-all duration-300 ease-in-out delay-150 path-0"></path>
+    <style>
+        .path-1 {
+            animation: pathAnim-1 4s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes pathAnim-1 {
+            0% {
+                d: path("M 0,400 C 0,400 0,266 0,266 C 75.8755980861244,265.6937799043062 151.7511961722488,265.3875598086124 246,257 C 340.2488038277512,248.61244019138758 452.87081339712927,232.14354066985646 554,232 C 655.1291866028707,231.85645933014354 744.7655502392344,248.03827751196178 839,257 C 933.2344497607656,265.9617224880382 1032.066985645933,267.70334928229664 1133,268 C 1233.933014354067,268.29665071770336 1336.9665071770335,267.1483253588517 1440,266 C 1440,266 1440,400 1440,400 Z");
+            }
+            25% {
+                d: path("M 0,400 C 0,400 0,266 0,266 C 94.19138755980862,297.8373205741627 188.38277511961724,329.67464114832535 287,313 C 385.61722488038276,296.32535885167465 488.6602870813397,231.13875598086122 593,233 C 697.3397129186603,234.86124401913878 802.9760765550242,303.7703349282297 902,312 C 1001.0239234449758,320.2296650717703 1093.4354066985645,267.7799043062201 1182,250 C 1270.5645933014355,232.2200956937799 1355.2822966507179,249.11004784688996 1440,266 C 1440,266 1440,400 1440,400 Z");
+            }
+            50% {
+                d: path("M 0,400 C 0,400 0,266 0,266 C 90.10526315789477,270.4019138755981 180.21052631578954,274.80382775119614 288,274 C 395.78947368421046,273.19617224880386 521.2631578947368,267.1866028708134 627,270 C 732.7368421052632,272.8133971291866 818.7368421052633,284.4497607655503 890,292 C 961.2631578947367,299.5502392344497 1017.7894736842104,303.0143540669857 1107,298 C 1196.2105263157896,292.9856459330143 1318.1052631578948,279.49282296650716 1440,266 C 1440,266 1440,400 1440,400 Z");
+            }
+            75% {
+                d: path("M 0,400 C 0,400 0,266 0,266 C 119.65550239234452,251.80861244019138 239.31100478468903,237.61722488038276 335,239 C 430.68899521531097,240.38277511961724 502.4114832535885,257.33971291866027 593,262 C 683.5885167464115,266.66028708133973 793.0430622009569,259.02392344497605 886,267 C 978.9569377990431,274.97607655502395 1055.4162679425838,298.5645933014354 1145,301 C 1234.5837320574162,303.4354066985646 1337.2918660287082,284.71770334928226 1440,266 C 1440,266 1440,400 1440,400 Z");
+            }
+            100% {
+                d: path("M 0,400 C 0,400 0,266 0,266 C 75.8755980861244,265.6937799043062 151.7511961722488,265.3875598086124 246,257 C 340.2488038277512,248.61244019138758 452.87081339712927,232.14354066985646 554,232 C 655.1291866028707,231.85645933014354 744.7655502392344,248.03827751196178 839,257 C 933.2344497607656,265.9617224880382 1032.066985645933,267.70334928229664 1133,268 C 1233.933014354067,268.29665071770336 1336.9665071770335,267.1483253588517 1440,266 C 1440,266 1440,400 1440,400 Z");
+            }
+        }</style>
+    <defs>
+        <linearGradient id="gradient" x1="0%" y1="50%" x2="100%" y2="50%">
+            <stop offset="5%" stop-color="#0693e3"></stop>
+            <stop offset="95%" stop-color="#afeeee"></stop>
+        </linearGradient>
+    </defs>
+    <path d="M 0,400 C 0,400 0,266 0,266 C 75.8755980861244,265.6937799043062 151.7511961722488,265.3875598086124 246,257 C 340.2488038277512,248.61244019138758 452.87081339712927,232.14354066985646 554,232 C 655.1291866028707,231.85645933014354 744.7655502392344,248.03827751196178 839,257 C 933.2344497607656,265.9617224880382 1032.066985645933,267.70334928229664 1133,268 C 1233.933014354067,268.29665071770336 1336.9665071770335,267.1483253588517 1440,266 C 1440,266 1440,400 1440,400 Z"
+          stroke="none" stroke-width="0" fill="url(#gradient)" fill-opacity="1"
+          class="transition-all duration-300 ease-in-out delay-150 path-1"></path>
+</svg>
+
+<div class=" navbar">
+    <div class="navbar-inner">
+        <h1 class="text-center" style="font-family: verdana, serif; font-size: 48px; color: black; margin-top: 100px;">
+            <b>GraphiSurf</b>
+        </h1>
+        <h5 class="text-center" style="font-family: verdana, serif; color: black; margin-top: 42px;">
+            Explore the world visually with GraphiSurf - Your Image Search Companion.
+        </h5>
+    </div>
+</div>
+
+<div style="text-align: center;"></div>
+
+<div id="main" class="container">
+    <table class="table" style=" margin-top: 46px;">
+        <tr>
+            <td>
+                <form method=post enctype=multipart/form-data>
+                    <div id="imagePreviewContainer"
+                         style="border: 2px dashed #ccc; width: 200px; height: 100px; position: relative; margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: center;" id="imagePreview"></div>
+                    </div>
+                    <div style="position: relative; display: inline-block; margin-bottom: 5px;">
+                        <!-- use a label to cover the input -->
+                        <label class="button" style="cursor: pointer;" for="imageUpload">Select Image</label>
+                        <input style="display:none" type="file" id="imageUpload" accept="image/*" name="file" required/>
+                    </div>
+                    <div>
+                        <input class="button" type=submit value="Surf!" onclick="upload()">
+                    </div>
+                </form>
+            </td>
+        </tr>
+        <tr id="row1" style="display:none;">
+            <td>
+                <div style="text-align: center;">
+                    <img id="load" src="/images/ajax-loader.gif" style="height:45px;width:45px;display:none;"
+                         alt="surfing...">
+                </div>
+                <a href="">
+                    <button class="button" id="clear" style="display:none;">Clear</button>
+                </a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="result" class="container">
+    <table id="table" class="table" style="display:none;">
+        <tr>
+            <td>
+                <div></div>
+            </td>
+        </tr>
+        <tr style="height: 30px;">
+            <td id="amount" style="width: 200px; text-align: left; color: #3F3F3F; font-family: verdana, serif; font-weight: 600; display: none">
+                Total Images: <span id="totalImages"></span>
+            </td>
+            <!-- add three empty columns to make the table centered -->
+            <td style="width: 200px;"></td>
+            <td style="width: 200px;"></td>
+            <td style="width: 200px;"></td>
+        </tr>
+        <tr>
+            <td colspan="4" id='filters' style="font-weight: 600; display: none">
+                <button class="selected-button" id="fl0" style="display:none;" onclick="classify('all', 0)">All</button>
+                <button class="filter-button" id="fl1" style="display:none;" onclick="classify('people', 1)">People</button>
+                <button class="filter-button" id="fl2" style="display:none;" onclick="classify('animals', 2)">Animals</button>
+                <button class="filter-button" id="fl3" style="display:none;" onclick="classify('plants', 3)">Plants</button>
+                <button class="filter-button" id="fl4" style="display:none;" onclick="classify('objects', 4)">Objects</button>
+                <button class="filter-button" id="fl5" style="display:none;" onclick="classify('scenes', 5)">Scenes</button>
+                <button class="filter-button" id="fl6" style="display:none;" onclick="classify('other', 6)">Other</button>
+            </td>
+        </tr>
+        <tr>
+            <td id="td0" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    display: none;
+">
+                <div class="image-container">
+                    <img id="img0" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll0" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb0" style="font-family: 微软雅黑, serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+
+            <td id="td1" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img1" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll1" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb1" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td2" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img2" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll2" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb2" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td3" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img3" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll3" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb3" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td id="td4" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img4" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll4" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb4" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td5" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img5" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll5" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb5" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td6" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img6" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll6" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb6" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td7" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img7" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll7" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb7" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td id="td8" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img8" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll8" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb8" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td9" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img9" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll9" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb9" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td10" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img10" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll10" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb10" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+            <td id="td11" style="
+    box-shadow: 1px 4px 4px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    border-left-width: 1px;
+    border-bottom-width: 1px;border-right-width: 1px;display: none;
+">
+                <div class="image-container">
+                    <img id="img11" src="" alt="GraphiSurfed" style="
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    width: 200px;
+    height: 200px;
+    padding: 5px 0 5px 5px;
+    border-left-width: 0;
+    border-bottom-width: 0;border-right-width: 0;
+    display: none;
+" width="200" height="200">
+                    <a id="dll11" href="" download="" style="display: none">
+                        <button type="button" class="download-button" id="dlb11" style="font-family: 微软雅黑 serif; display:none;" title="Download image">↓</button>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div style="height: 15px"></div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+<script type="text/javascript">
+    // get the form elements defined in your form HTML above
+    const imageUpload = document.getElementById('imageUpload');
+    const imagePreview = document.getElementById('imagePreview');
+    const totalImagesElement = document.getElementById('totalImages');
+    const downloadLink = [];
+    for (let i = 0; i < 12; i++) {
+        downloadLink.push(document.getElementById('dll' + i));
+    }
+
+    // show the uploaded image preview
+    imageUpload.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.addEventListener('load', function () {
+                // create an image element as a child of the image preview div
+                const img = document.createElement('img');
+                img.src = reader.result.toString();
+
+                // set the image element style
+                img.style.maxWidth = '195px';
+                img.style.maxHeight = '95px';
+
+                // clear the previous image preview and append the new image preview
+                imagePreview.innerHTML = '';
+                imagePreview.appendChild(img);
+            });
+
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function upload() {
+        // check if the user has selected an image to upload
+        if (imageUpload.files.length === 0) {
+            alert("Please select an image to upload.");
+            return;
+        }
+
+        $("form").submit(function (evt) {
+            $('#row1').show();
+            $('#load').show();
+            $('#clear').hide();
+            evt.preventDefault();
+            let formData = new FormData($(this)[0]);
+
+            // disable the submit button to prevent repeated clicks
+            $("input[type=submit]").attr('disabled', true);
+            $.ajax({
+                url: 'imgUpload',
+                type: 'POST',
+                data: formData,
+                cache: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                processData: false,
+
+                success: function (response) {
+                    $("input[type=submit]").attr('disabled', false);
+                    $('#load').hide();
+                    $('#clear').show();
+                    $('#table').show();
+                    $('#amount').show();
+                    $('#filters').show();
+                    for (let i = 0; i < 7; i++) {
+                        $('#fl' + i).show();
+                    }
+                    // renew the total images count
+                    totalImagesElement.textContent = Object.keys(response).length.toString();
+                    // use loop to simplify the code
+                    for (let i = 0; i < Object.keys(response).length; i++) {
+                        document.getElementById("img" + i).src = response["image" + i];
+                        $('#td' + i).show();
+                        $('#img' + i).show();
+                        $('#dll' + i).show();
+                        $('#dlb' + i).show();
+                        // set the download link
+                        downloadLink[i].setAttribute('href', response["image" + i]);
+                    }
+                    for (let i = Object.keys(response).length; i < 12; i++) {
+                        $('#td' + i).hide();
+                        $('#img' + i).hide();
+                        $('#dll' + i).hide();
+                        $('#dlb' + i).hide();
+                    }
+                    // scroll to the bottom of the page
+                    window.scrollTo({
+                        top: document.body.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                },
+                error: function () {
+                    $("input[type=submit]").attr('disabled', false)
+                }
+            });
+            return false;
+        })
+    }
+
+    function classify(className, classId) {
+        // change the color of the selected button
+        for (let i = 0; i < 7; i++) {
+            if (i === classId)
+                $('#fl' + i).removeClass("filter-button").addClass("selected-button");
+            else
+                $('#fl' + i).removeClass("selected-button").addClass("filter-button");
+        }
+
+        $.ajax({
+            url: 'imgClassify',
+            type: 'GET',
+            data: {
+                className: className
+            },
+            success: function (response) {
+                totalImagesElement.textContent = Object.keys(response).length.toString();
+                for (let i = 0; i < Object.keys(response).length; i++) {
+                    document.getElementById("img" + i).src = response["image" + i];
+                    $('#td' + i).show();
+                    $('#img' + i).show();
+                    $('#dll' + i).show();
+                    $('#dlb' + i).show();
+                }
+                for (let i = Object.keys(response).length; i < 12; i++) {
+                    $('#td' + i).hide();
+                    $('#img' + i).hide();
+                    $('#dll' + i).hide();
+                    $('#dlb' + i).hide();
+                }
+                // scroll to the bottom of the page
+                window.scrollTo({
+                    top: document.body.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    }
+</script>
+
+
+</body>
+
+</html>
