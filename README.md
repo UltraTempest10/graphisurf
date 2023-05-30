@@ -13,15 +13,15 @@ GraphiSurf is an image search engine that allows you to search for images by upl
 
 ## Installation
 
-To install GraphiSurf, download the zip package and extract it to your preferred location on your computer. You should have installed Python 3.7 and the following packages:
+To install GraphiSurf, download all the files to your preferred location on your computer. You should have installed Python 3.7 and the following packages:
 
-- Flask
-- Flask-HTTPAuth
-- NumPy
-- TensorFlow(v2.2.0)
-- SciPy
-- Imageio
-- Protobuf(v3.19)
+`Flask`
+`Flask-HTTPAuth`
+`NumPy`
+`TensorFlow 2.2.0`
+`SciPy`
+`Imageio`
+`Protobuf 3.19`
 
 Command:
 
